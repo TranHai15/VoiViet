@@ -120,15 +120,17 @@ axiosClient.interceptors.request.use(
 
       // Nếu có accessToken, thêm vào header Authorization
       config.headers["Authorization"] = `Bearer ${data?.accessToken}`;
+      config.headers["MS"] = data.id;
       //  Tạo đối tượng để gửi dữ liệu mỗi lần gửi lên
-      const user = {
-        a: data.id,
-        b: data.phong_ban_id,
-        c: data.role_id
-      };
-      if (["post", "put", "patch"].includes(config.method.toLowerCase())) {
-        config.data = { ...config.data, data: user };
-      }
+      // const user = {
+      //   a: data.id,
+      //   b: data.phong_ban_id,
+      //   c: data.role_id
+      // };
+      // if (["post", "put", "patch"].includes(config.method.toLowerCase())) {
+      //   console.log({ ...config.data });
+      //   config.data = { ...config.data, data: user };
+      // }
     }
     return config;
   },
@@ -176,11 +178,11 @@ axiosClient.interceptors.response.use(
           // Nếu không có token mới, chuyển hướng đến login
           // alert("Token đã hết hạn, vui lòng đăng nhập lại.");
           showNotification(
-            "Phiên đã hết hạn, vui lòng đăng nhập lại.",
+            "Phiên đã hết hạn, vui lòng đăng nhập lại.5",
             "error"
           );
           // Gọi hàm loadHome để đăng xuất và chuyển hướng (hoặc gọi logout trực tiếp)
-          await loadHome("Phiên đã hết hạn, vui lòng đăng nhập lại.", "error");
+          // await loadHome("Phiên đã hết hạn, vui lòng đăng nhập lại.", "error");
           return Promise.reject(error);
         }
       }

@@ -19,7 +19,7 @@ const Account = () => {
   const Navigator = useNavigate();
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
-
+  const id_nguoi_dung = dataUser?.id;
   useEffect(() => {
     const fetchUsers = async () => {
       const res = await axiosClient.post("/user/", {
@@ -220,12 +220,16 @@ const Account = () => {
                     >
                       Chi tiết
                     </button>
-                    <button
-                      onClick={() => handleDelete(user.id)}
-                      className="px-3 py-1 bg-red-500 text-white rounded-md hover:bg-red-600"
-                    >
-                      Xóa
-                    </button>
+                    {id_nguoi_dung == user.id ? (
+                      ""
+                    ) : (
+                      <button
+                        onClick={() => handleDelete(user.id)}
+                        className="px-3 py-1 bg-red-500 text-white rounded-md hover:bg-red-600"
+                      >
+                        Xóa
+                      </button>
+                    )}
                   </td>
                 </tr>
               ))}

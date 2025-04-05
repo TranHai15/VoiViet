@@ -10,7 +10,7 @@ export default function CreateAccount() {
 
   const Navigator = useNavigate();
   const [newUser, setNewUser] = useState({
-    name: "",
+    fullname: "",
     username: "",
     password: "",
     role: "2", // Mặc định là User
@@ -34,8 +34,8 @@ export default function CreateAccount() {
     let formErrors = {};
     let isValid = true;
 
-    if (!newUser.name) {
-      formErrors.name = "Tên không được để trống!";
+    if (!newUser.fullname) {
+      formErrors.fullname = "Tên không được để trống!";
       isValid = false;
     }
     if (!newUser.username) {
@@ -103,7 +103,7 @@ export default function CreateAccount() {
           // alert("Tạo tài khoản thành công!");
           showNotification("Tạo tài khoản thành công!");
           setNewUser({
-            name: "",
+            fullname: "",
             username: "",
             password: "",
             role: "2",
@@ -135,23 +135,6 @@ export default function CreateAccount() {
             <label className="block font-medium">Tài Khoản</label>
             <input
               type="text"
-              name="name"
-              value={newUser.name}
-              onChange={handleInputChange}
-              className="mt-1 p-2 w-full border rounded-md"
-            />
-            {errors.name && (
-              <div className="text-red-500 text-sm mt-1">{errors.name}</div>
-            )}
-            {error.name && (
-              <p className="text-red-500 text-sm mt-1">{errors.name.message}</p>
-            )}
-          </div>
-
-          <div>
-            <label className="block font-medium">Họ Và Tên</label>
-            <input
-              type="text"
               name="username"
               value={newUser.username}
               onChange={handleInputChange}
@@ -160,7 +143,31 @@ export default function CreateAccount() {
             {errors.username && (
               <div className="text-red-500 text-sm mt-1">{errors.username}</div>
             )}
+            {error.username && (
+              <p className="text-red-500 text-sm mt-1">
+                {errors.username.message}
+              </p>
+            )}
             {error && <p className="text-red-500 text-sm mt-1">{error}</p>}
+          </div>
+
+          <div>
+            <label className="block font-medium">Họ Và Tên</label>
+            <input
+              type="text"
+              name="fullname"
+              value={newUser.fullname}
+              onChange={handleInputChange}
+              className="mt-1 p-2 w-full border rounded-md"
+            />
+            {errors.fullname && (
+              <div className="text-red-500 text-sm mt-1">{errors.fullname}</div>
+            )}
+            {error.username && (
+              <p className="text-red-500 text-sm mt-1">
+                {errors.username.message}
+              </p>
+            )}
           </div>
 
           <div>

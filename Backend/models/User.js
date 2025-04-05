@@ -317,7 +317,7 @@ ORDER BY
     }
   }
 
-  static async getAllNoffitionID(id) {
+  static async getAllNoffitionID() {
     const user = new User();
     await user.connect();
 
@@ -371,7 +371,7 @@ WHERE phong_ban_id = ?
  ORDER BY created_at desc `;
 
     try {
-      const [rows] = await user.connection.execute(query);
+      const [rows] = await user.connection.execute(query, [id]);
       return rows;
     } catch (error) {
       console.error("Không lấy được dữ liệu lich su chat:", error);

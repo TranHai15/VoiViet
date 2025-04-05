@@ -22,7 +22,7 @@ const FileList = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
   const { isRole, phongBanID } = useContext(AuthContext);
-  console.log("🚀 ~ FileList ~ isRole:", isRole);
+  // console.log("🚀 ~ FileList ~ isRole:", isRole);
   // Lấy dữ liệu từ backend
   useEffect(() => {
     fetchFiles();
@@ -33,8 +33,8 @@ const FileList = () => {
         phoneBanId: phongBanID,
         role_id: isRole
       }); // API để lấy danh sách file
-      console.log("🚀 ~ fetchFiles ~ isRole:", isRole);
-      console.log("🚀 ~ fetchFiles ~ phongBanID:", phongBanID);
+      // console.log("🚀 ~ fetchFiles ~ isRole:", isRole);
+      // console.log("🚀 ~ fetchFiles ~ phongBanID:", phongBanID);
       const dataNew = response.data.filter((e) => e.statusFile >= 0);
 
       // setFilesgoc(response.data);

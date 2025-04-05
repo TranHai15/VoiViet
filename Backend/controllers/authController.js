@@ -37,9 +37,10 @@ const authController = {
     }
   },
   registerUserAdmin: async (req, res) => {
-    const { name, username, password, role, phong_ban, oldPassword } = req.body;
-    console.log("🚀 ~ registerUserAdmin: ~ oldPassword:", oldPassword);
-
+    const { fullname, username, password, role, phong_ban, oldPassword } =
+      req.body;
+    console.log("🚀 ~ registerUserAdmin: ~ username:", username);
+    console.log("🚀 ~ registerUserAdmin: ~ fullname:", fullname);
     if (!password || !username) {
       return res.status(400).json("Tên, và mật khẩu là bắt buộc.");
     }
@@ -47,15 +48,15 @@ const authController = {
     try {
       const emailExists = await User.checkEmailExists(username);
       if (emailExists) {
-        return res.status(400).json("Tên đã được sử dụng.");
+        return res.status(400).json("Tài Khoản đã được sử dụng.");
       }
 
       const salt = await bcryptjs.genSalt(10);
       const hashedPassword = await bcryptjs.hash(password, salt);
 
       const userId = await User.insertUseradmin(
-        name,
         username,
+        fullname,
         hashedPassword,
         role,
         phong_ban
@@ -78,7 +79,7 @@ const authController = {
     return jwt.sign(
       { id: user.id, role_id: user.role_id },
       process.env.JWT_ACCESS_TOKEN,
-      { expiresIn: "20s" }
+      { expiresIn: "3h" }
     );
   },
 
@@ -87,7 +88,7 @@ const authController = {
     return jwt.sign(
       { id: user.id, role_id: user.role_id },
       process.env.JWT_REFRESH_TOKEN,
-      { expiresIn: "120s" }
+      { expiresIn: "3d" }
     );
   },
 
@@ -121,12 +122,14 @@ const authController = {
         });
       }
 
-      const isLogin = await User.getSessionByUserId(user.id, false);
-      if (isLogin > 0) {
-        return res.status(409).json({
-          All: "Tài Khoản này đang được đăng nhập trên thiết bị khác"
-        });
-      }
+      // const isLogin = await User.getSessionByUserId(user.id, false);
+      // console.log("🚀 ~ loginUser: ~ isLogin:", isLogin);
+      // console.log(isLogin[0].session_count > 0);
+      // if (isLogin[0].session_count > 0) {
+      //   return res.status(409).json({
+      //     All: "Tài Khoản này đang được đăng nhập trên thiết bị khác"
+      //   });
+      // }
       //  xóa hết phiên đăng nhập của tài khoản theo id
       await User.getSessionByUserId(user.id, true);
 

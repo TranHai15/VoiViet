@@ -190,8 +190,14 @@ const dataUser = {
   getAllNof: async (req, res) => {
     try {
       const { id } = req.body;
-      if (!id) {
-        return res.status(400).json("ID người dùng là bắt buộc."); // Kiểm tra ID
+      if (id == 0) {
+        if (!!id) {
+          return res.status(400).json("ID người dùng là bắt buộc."); // Kiểm tra ID
+        }
+      } else {
+        if (!id) {
+          return res.status(400).json("ID người dùng là bắt buộc."); // Kiểm tra ID
+        }
       }
       const getChat = await User.getAllNoffition(id);
       // console.log("message: Lay thành công");
@@ -206,7 +212,6 @@ const dataUser = {
   getAllNofID: async (req, res) => {
     try {
       const getChat = await User.getAllNoffitionID();
-      console.log("🚀 ~ getAllNofID: ~ getChat:", getChat);
       // console.log("message: Lay thành công");
       return res.status(200).json({ getChat });
     } catch (error) {
