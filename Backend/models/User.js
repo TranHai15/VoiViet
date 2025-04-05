@@ -123,7 +123,7 @@ class User {
     r.role_name,
     r.description
 FROM users u
-LEFT JOIN Roles r ON u.role_id = r.role_id
+LEFT JOIN roles r ON u.role_id = r.role_id
 JOIN phong_ban p ON u.phong_ban_id = p.id
 WHERE (? = 1)
    OR (u.phong_ban_id = ? AND u.role_id != 1);
@@ -155,7 +155,7 @@ WHERE (? = 1)
     r.role_name,
     r.description
 FROM users u
-LEFT JOIN Roles r ON u.role_id = r.role_id
+LEFT JOIN roles r ON u.role_id = r.role_id
 JOIN phong_ban p ON u.phong_ban_id = p.id
 `;
     try {
