@@ -1,57 +1,6 @@
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
-
-const refreshAccessToken = async () => {
-  const activeUser = JSON.parse(localStorage.getItem("active"));
-  const id = activeUser?.dataLogin?.dataUser?.id;
-  const refreshToken = activeUser?.dataLogin?.refreshToken;
-
-  if (!id || !refreshToken) {
-    console.error("ID or refreshToken is missing in localStorage");
-    return null;
-  }
-
-  try {
-    // console.log("cap lai token");
-    const response = await axiosClient.post("/auth/refresh", {
-      id: id,
-      refreshToken: refreshToken
-    });
-
-    if (response.status !== 200) {
-      console.error(`Failed to refresh token: ${response.statusText}`);
-      return null;
-    }
-
-    const { accessToken, refreshToken: newRefreshToken } = response.data;
-    // console.log("🚀 ~ refreshAccessToken ~ newRefreshToken:", newRefreshToken);
-    // console.log("🚀 ~ refreshAccessToken ~ response:", response.data);
-
-    // Cập nhật lại dữ liệu trong localStorage
-    const updatedUserData = {
-      isLogin: true,
-      dataLogin: {
-        dataUser: activeUser.dataLogin.dataUser,
-        accessToken: accessToken,
-        refreshToken: newRefreshToken
-      }
-    };
-    localStorage.setItem("active", JSON.stringify(updatedUserData));
-
-    return { accessToken, newRefreshToken }; // Trả về cả accessToken và refreshToken mới
-  } catch (error) {
-    // console.error("Error refreshing token:", error);
-    // console.log(error.response.data.code);
-    if (error.response.data.code === "REFRESH_TOKEN_EXPIRED") {
-      alert("vui long dang nhap lai");
-      localStorage.removeItem("active");
-
-      window.location.href = "/login";
-      console.log("vui long dang nhap lai");
-    }
-    return null;
-  }
-};
+import { showNotification } from "../func/index.js";
+import { jwtDecode } from "jwt-decode";
 
 const axiosClient = axios.create({
   baseURL: `${import.meta.env.VITE_API_BACKEND}`,
@@ -60,35 +9,126 @@ const axiosClient = axios.create({
   }
 });
 
+//  chức năng lấy ra các thông tin user
+const getDataLocalStorage = () => {
+  const activeUser = JSON.parse(localStorage.getItem("active"));
+  const accessToken = activeUser?.dataLogin?.accessToken;
+  const refreshToken = activeUser?.dataLogin?.refreshToken;
+  const phong_ban_id = activeUser?.dataLogin?.dataUser?.phong_ban_id;
+  const decoded = jwtDecode(accessToken);
+  const { role_id } = decoded;
+  const id = activeUser?.dataLogin?.dataUser?.id;
+  const dataUser = activeUser?.dataLogin?.dataUser;
+  return {
+    accessToken: accessToken,
+    refreshToken: refreshToken,
+    phong_ban_id: phong_ban_id,
+    id: id,
+    dataUser: dataUser,
+    role_id: role_id
+  };
+};
+const logout = async (id) => {
+  const res = await axiosClient.post("/auth/logout", { id: id });
+  if (res.status === 200 || res.status == 201) {
+    const data = {
+      data: {
+        dataUser: "",
+        refreshToken: "",
+        accessToken: ""
+      },
+      isLogin: false
+    };
+    localStorage.setItem("active", JSON.stringify(data));
+  } else {
+    showNotification("Đăng  Xuat Không thành công!", "error");
+  }
+};
+const loadHome = async (message, type = "error") => {
+  const data = getDataLocalStorage();
+  const id = data?.id;
+  await logout(id);
+  showNotification(message, type);
+  localStorage.removeItem("active");
+  setTimeout(() => {
+    window.location.href = "/login";
+  }, 3000);
+};
+
+const refreshAccessToken = async () => {
+  // Lay du lieu tu localStorage
+  const data = getDataLocalStorage();
+  // kiem ra xem ton tai khong
+  if (!data.id || !data.refreshToken) {
+    console.error("ID or refreshToken is missing in localStorage");
+    return null;
+  }
+  try {
+    // console.log("cap lai token");
+    const response = await axiosClient.post("/auth/refresh", {
+      id: data.id,
+      refreshToken: data.refreshToken
+    });
+    if (response.status !== 200) {
+      console.error(`Failed to refresh token: ${response.statusText}`);
+      return null;
+    }
+    const { accessToken, refreshToken: newRefreshToken } = response.data;
+
+    // Cập nhật lại dữ liệu trong localStorage
+    const updatedUserData = {
+      isLogin: true,
+      dataLogin: {
+        dataUser: data.dataUser,
+        accessToken: accessToken,
+        refreshToken: newRefreshToken
+      }
+    };
+    localStorage.setItem("active", JSON.stringify(updatedUserData));
+
+    return { accessToken, newRefreshToken }; // Trả về cả accessToken và refreshToken mới
+  } catch (error) {
+    if (error.response.data.code === "REFRESH_TOKEN_EXPIRED") {
+      // loadHome("Vui Lòng Đăng Nhập Lại");
+      // alert("hihi");
+      // return null;
+    }
+    return null;
+  }
+};
+
 // Interceptor để thêm accessToken vào header
 axiosClient.interceptors.request.use(
   function (config) {
-    // refreshAccessToken();
-    // Kiểm tra xem URL có phải là /login, /register, hoặc /reftoken không
+    // Kiểm tra xem URL có phải là /login, /register, hoặc /reftoken không bỏ qua nếu là các url này
     if (
       config.url !== "auth/login" &&
       config.url !== "auth/register" &&
       config.url !== "auth/refresh"
     ) {
-      const activeUser = JSON.parse(localStorage.getItem("active"));
-      const accessToken = activeUser.dataLogin.accessToken;
-      const id = activeUser?.dataLogin?.dataUser?.id;
-
+      const data = getDataLocalStorage();
+      // console.log("🚀 ~ data:", data);
       // Kiểm tra nếu không có accessToken, chuyển hướng đến trang login hoặc xử lý lỗi
-      if (!accessToken) {
-        const Navigator = useNavigate();
-        Navigator("/login");
+      if (!data.accessToken) {
+        showNotification(
+          "Phiên đã hết hạn, vui lòng đăng nhập lại. 1",
+          "error"
+        );
+        // loadHome();
         return Promise.reject("No access token found, please log in.");
       }
 
       // Nếu có accessToken, thêm vào header Authorization
-      config.headers["Authorization"] = `Bearer ${accessToken}`;
-      config.headers["MS"] = id;
-      // if (
-      //   ["post", "put", "patch", "delete"].includes(config.method.toLowerCase())
-      // ) {
-      //   config.data = { ...config.data, userId: id };
-      // }
+      config.headers["Authorization"] = `Bearer ${data?.accessToken}`;
+      //  Tạo đối tượng để gửi dữ liệu mỗi lần gửi lên
+      const user = {
+        a: data.id,
+        b: data.phong_ban_id,
+        c: data.role_id
+      };
+      if (["post", "put", "patch"].includes(config.method.toLowerCase())) {
+        config.data = { ...config.data, data: user };
+      }
     }
     return config;
   },
@@ -106,8 +146,6 @@ axiosClient.interceptors.response.use(
   },
   async function (error) {
     const originalRequest = error.config;
-
-    // console.log("🚀 ~ originalRequest:", originalRequest);
     // Kiểm tra nếu lỗi là do token hết hạn (errorCode: TOKEN_EXPIRED)
     try {
       if (
@@ -117,18 +155,32 @@ axiosClient.interceptors.response.use(
       ) {
         originalRequest._retry = true;
 
-        const { accessToken, newRefreshToken } = await refreshAccessToken();
-        // console.log("🚀 ~ accessToken:", accessToken);
-
-        if (accessToken) {
+        const res = await refreshAccessToken();
+        if (!res || !res.accessToken) {
+          originalRequest._retry = false;
+          showNotification(
+            "Phiên đã hết hạn, vui lòng đăng nhập lại.",
+            "error"
+          );
+          // Gọi hàm loadHome để đăng xuất và chuyển hướng (hoặc gọi logout trực tiếp)
+          await loadHome("Phiên đã hết hạn, vui lòng đăng nhập lại.", "error");
+          return Promise.reject(error);
+        }
+        if (res.accessToken) {
           // Nếu có accessToken mới, cập nhật lại header và gọi lại request cũ
-          originalRequest.headers["Authorization"] = `Bearer ${accessToken}`;
+          originalRequest.headers[
+            "Authorization"
+          ] = `Bearer ${res.accessToken}`;
           return axiosClient(originalRequest); // Gọi lại request ban đầu với accessToken mới
         } else {
           // Nếu không có token mới, chuyển hướng đến login
-          alert("Token đã hết hạn, vui lòng đăng nhập lại.");
-          const Navigator = useNavigate();
-          Navigator("/login");
+          // alert("Token đã hết hạn, vui lòng đăng nhập lại.");
+          showNotification(
+            "Phiên đã hết hạn, vui lòng đăng nhập lại.",
+            "error"
+          );
+          // Gọi hàm loadHome để đăng xuất và chuyển hướng (hoặc gọi logout trực tiếp)
+          await loadHome("Phiên đã hết hạn, vui lòng đăng nhập lại.", "error");
           return Promise.reject(error);
         }
       }
@@ -137,6 +189,7 @@ axiosClient.interceptors.response.use(
       return Promise.reject(error);
     } catch (error) {
       console.log(error);
+      // showNotification("Phiên đã hết hạn, vui lòng đăng nhập lại.3", "error");
     }
   }
 );

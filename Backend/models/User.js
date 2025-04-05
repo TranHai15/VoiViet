@@ -93,7 +93,7 @@ class User {
 
     try {
       const [rows] = await user.connection.execute(query, [username]);
-      console.log("🚀 ~ User ~ checkEmailExists ~ rows:", rows);
+      // console.log("🚀 ~ User ~ checkEmailExists ~ rows:", rows);
       if (!data) {
         return rows.length > 0; // Nếu có bản ghi, trả về true
       } else {
@@ -348,6 +348,38 @@ Join phong_ban as p on p.id = users.phong_ban_id
       await user.closeConnection(); // Đóng kết nối
     }
   }
+  static async getAllNoffition(id) {
+    const user = new User();
+    await user.connect();
+
+    const query = `SELECT 
+    users.id AS user_id,
+    users.username,
+    users.fullname,
+    users.phong_ban_id,
+    p.ten_phong,
+    n.id AS task_id,
+    n.task,
+    n.deadline,
+    n.status,
+    n.is_read,
+    n.created_at
+FROM users
+JOIN notifications AS n ON users.id = n.user_id
+Join phong_ban as p on p.id = users.phong_ban_id
+WHERE phong_ban_id = ?
+ ORDER BY created_at desc `;
+
+    try {
+      const [rows] = await user.connection.execute(query);
+      return rows;
+    } catch (error) {
+      console.error("Không lấy được dữ liệu lich su chat:", error);
+      throw error;
+    } finally {
+      await user.closeConnection(); // Đóng kết nối
+    }
+  }
   static async insertNof(tasks) {
     const user = new User();
     await user.connect();
@@ -578,13 +610,28 @@ Join phong_ban as p on p.id = users.phong_ban_id
 
     let query = "";
     if (check) {
-      query = `SELECT refresh_token  FROM user_sessions WHERE id = ?`;
+      query = `delete  FROM user_sessions WHERE id = ?`;
     } else {
       query = `SELECT COUNT(*) AS session_count FROM user_sessions WHERE id = ? `;
     }
 
     try {
       const [results] = await user.connection.execute(query, [userId]);
+      return results; // Trả về các phiên đăng nhập
+    } catch (error) {
+      console.error("Lỗi khi lấy phiên đăng nhập:", error);
+      throw error;
+    } finally {
+      await user.closeConnection(); // Đóng kết nối
+    }
+  }
+
+  static async getToken(id) {
+    const user = new User();
+    await user.connect();
+    let query = `select refresh_token  FROM user_sessions WHERE id = ?`;
+    try {
+      const [results] = await user.connection.execute(query, [id]);
       return results; // Trả về các phiên đăng nhập
     } catch (error) {
       console.error("Lỗi khi lấy phiên đăng nhập:", error);
@@ -617,7 +664,7 @@ Join phong_ban as p on p.id = users.phong_ban_id
     const user = new User();
     await user.connect();
 
-    const query = `UPDATE user_sessions SET refresh_token = ? WHERE id = ?`;
+    const query = `UPDATE user_sessions SET refresh_token = ? access_token = ? WHERE id = ?`;
 
     try {
       const [result] = await user.connection.execute(query, [

@@ -1,7 +1,10 @@
 import bcryptjs from "bcryptjs";
 import jwt from "jsonwebtoken";
 import User from "../models/User.js";
-
+import moment from "moment-timezone";
+function dateTime() {
+  return moment().tz("Asia/Ho_Chi_Minh").format("YYYY-MM-DD HH:mm:ss");
+}
 const authController = {
   // Phương thức tạo tài khoản
   registerUser: async (req, res) => {
@@ -75,7 +78,7 @@ const authController = {
     return jwt.sign(
       { id: user.id, role_id: user.role_id },
       process.env.JWT_ACCESS_TOKEN,
-      { expiresIn: "1h" }
+      { expiresIn: "20s" }
     );
   },
 
@@ -84,7 +87,7 @@ const authController = {
     return jwt.sign(
       { id: user.id, role_id: user.role_id },
       process.env.JWT_REFRESH_TOKEN,
-      { expiresIn: "365d" }
+      { expiresIn: "120s" }
     );
   },
 
@@ -118,22 +121,20 @@ const authController = {
         });
       }
 
-      const session = await User.getSessionByUserId(user.id, true);
+      const isLogin = await User.getSessionByUserId(user.id, false);
+      if (isLogin > 0) {
+        return res.status(409).json({
+          All: "Tài Khoản này đang được đăng nhập trên thiết bị khác"
+        });
+      }
+      //  xóa hết phiên đăng nhập của tài khoản theo id
+      await User.getSessionByUserId(user.id, true);
 
       let accessToken, refreshToken;
-
-      if (session.length > 0) {
-        accessToken = authController.createAccessToken(user);
-        refreshToken = session[0].refresh_token;
-        const expiresAt = new Date(Date.now() + 365 * 24 * 60 * 60 * 1000);
-        await User.updateSession(user.id, accessToken, refreshToken, expiresAt);
-      } else {
-        accessToken = authController.createAccessToken(user);
-        refreshToken = authController.createRefreshToken(user);
-        const expiresAt = new Date(Date.now() + 365 * 24 * 60 * 60 * 1000);
-        await User.insertSession(user.id, accessToken, refreshToken, expiresAt);
-      }
-
+      accessToken = authController.createAccessToken(user);
+      refreshToken = authController.createRefreshToken(user);
+      const expiresAt = dateTime();
+      await User.insertSession(user.id, accessToken, refreshToken, expiresAt);
       const {
         password: pwd,
         role_id,
@@ -142,6 +143,7 @@ const authController = {
         email,
         ...userData
       } = user;
+      console.log("🚀 ~ loginUser: ~ user:", user);
 
       // console.log({ userData });
       res.status(200).json({
@@ -154,17 +156,17 @@ const authController = {
       res.status(500).json({ All: "Đã xảy ra lỗi, vui lòng thử lại sau" });
     }
   },
-
+  // cấp lại token
   requestRefreshToken: async (req, res) => {
-    const refreshToken = req.body.refreshToken;
+    // const refreshToken = req.body.refreshToken;
+    const { id, refreshToken } = req.body;
     if (!refreshToken) {
       return res
         .status(401)
         .json({ code: "NO_REFRESH_TOKEN", message: "Bạn chưa đăng nhập." });
     }
-
     try {
-      const session = await User.getSessionByUserId(req.body.id, true);
+      const session = await User.getToken(id);
       const tokenExists = session[0]?.refresh_token === refreshToken;
       if (!tokenExists) {
         return res.status(403).json({
@@ -178,22 +180,21 @@ const authController = {
         process.env.JWT_REFRESH_TOKEN,
         async (error, user) => {
           if (error) {
-            console.log(error);
             return res.status(403).json({
               code: "REFRESH_TOKEN_EXPIRED",
               message: "Refresh token không hợp lệ hoặc đã hết hạn."
             });
           }
-
-          // Tạo mới AccessToken và RefreshToken
-          console.log("user", user);
           const newAccessToken = authController.createAccessToken(user);
           const newRefreshToken = authController.createRefreshToken(user);
-          // console.log("🚀 ~ newRefreshToken:", newRefreshToken);
-
           // Cập nhật RefreshToken mới vào database
-          await User.updateRefreshToken(user.id, newRefreshToken);
-
+          const time = dateTime();
+          await User.updateSession(
+            user.id,
+            newAccessToken,
+            newRefreshToken,
+            time
+          );
           res.status(200).json({
             accessToken: newAccessToken,
             refreshToken: newRefreshToken
@@ -211,11 +212,8 @@ const authController = {
 
   // Logout
   userLogout: async (req, res) => {
-    // console.log(req);
     const { id } = req.body;
-    console.log(id);
     await User.deleteSession(id);
-    // res.clearCookie("refreshToken");
     res.status(200).json("Đăng xuất thành công.");
   }
 };

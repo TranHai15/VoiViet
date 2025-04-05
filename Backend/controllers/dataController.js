@@ -129,15 +129,6 @@ const dataController = {
       } else {
         pass = passwordOld;
       }
-      // console.log("🚀 ~ updateInfosUser: ~ id:", id);
-      // console.log("🚀 ~ updateInfosUser: ~ passwordNew:", passwordNew);
-      // console.log("🚀 ~ updateInfosUser: ~ passwordOld:", passwordOld);
-      // console.log("🚀 ~ updateInfosUser: ~ createdAt:", createdAt);
-      // console.log("🚀 ~ updateInfosUser: ~ phong_ban_id:", phong_ban_id);
-      // console.log("🚀 ~ updateInfosUser: ~ role:", role);
-      // console.log("🚀 ~ updateInfosUser: ~ fullname:", fullname);
-      // console.log("🚀 ~ updateInfosUser: ~ username:", username);
-      // console.log("🚀 ~ updateInfosUser: ~ pass:", pass);
       const numberHistoryChat = await User.updateUser(
         username,
         fullname,

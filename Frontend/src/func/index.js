@@ -1,5 +1,6 @@
 // notification.js
 import Swal from "sweetalert2"; // Import SweetAlert2
+import axiosClient from "../api/axiosClient";
 
 function showNotification(message, type = "success") {
   Swal.fire({
@@ -22,5 +23,6 @@ async function showConfirm(message) {
 
   return result.isConfirmed; // Trả về true nếu nhấn xác nhận, false nếu nhấn hủy
 }
+
 // Đảm bảo thư viện có thể sử dụng
 export { showNotification, showConfirm };

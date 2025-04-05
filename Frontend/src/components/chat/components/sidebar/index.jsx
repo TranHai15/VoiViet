@@ -1,4 +1,4 @@
-import { NavLink, useLocation, useNavigate } from "react-router-dom";
+import { NavLink } from "react-router-dom";
 import "./style.css";
 import { ChatContext } from "../../../../contexts/ChatContext";
 import { useContext, useEffect, useState } from "react";
@@ -7,22 +7,60 @@ import axiosClient from "../../../../api/axiosClient";
 export default function Sidebar() {
   const [HistoryChat, setHistoryChat] = useState([]);
   const [NewChatTest, setNewChatTest] = useState([]);
-  const { isLogin, dataUser, isRole, Navigate, Location } =
-    useContext(AuthContext);
-  const Navigator = useNavigate();
+  const { isLogin, isRole, Navigate, Location } = useContext(AuthContext);
   const { setIsSidebar, SetMessagesChat } = useContext(ChatContext);
-  const location = useLocation();
-  const existingRoomId = location.pathname;
+  const existingRoomId = Location.pathname;
   const tachchuoi = existingRoomId.split("/");
 
   const cuoichuoi = tachchuoi[2];
 
   const redirectToLogin = () => {
-    Navigator("/login");
+    Navigate("/login");
   };
   const newChat = () => {
     SetMessagesChat([]);
-    Navigator("/");
+    Navigate("/");
+  };
+  const getOneChat = async (id) => {
+    try {
+      const res = await axiosClient.post(
+        "http://localhost:3000/user/historyChat",
+        {
+          id: id
+        }
+      );
+
+      if (res.status === 200 || res.status === 201) {
+        const data = res.data.getChat;
+        if (data.length == 0) {
+          SetMessagesChat([]);
+          Navigate("/");
+          return;
+        }
+        SetMessagesChat(res.data.getChat);
+        return;
+      }
+    } catch (error) {
+      console.error("Retrying... Error:", error);
+    }
+  };
+
+  const getAllChat = async () => {
+    try {
+      const activeUser = JSON.parse(localStorage.getItem("active"));
+      const id = activeUser.dataLogin.dataUser.id;
+      if (id !== null) {
+        const res = await axiosClient.post("http://localhost:3000/user/chat", {
+          id: id
+        });
+        if (res?.status === 200 || res?.status === 201) {
+          setHistoryChat(res.data.getChat);
+          return;
+        }
+      }
+    } catch (error) {
+      console.error("Retrying... Error:", error);
+    }
   };
 
   useEffect(() => {
@@ -56,49 +94,6 @@ export default function Sidebar() {
   };
   // console.log("message chwat", message);
 
-  const getOneChat = async (id) => {
-    try {
-      const res = await axiosClient.post(
-        "http://localhost:3000/user/historyChat",
-        {
-          id: id
-        }
-      );
-
-      if (res.status === 200 || res.status === 201) {
-        const data = res.data.getChat;
-        if (data.length == 0) {
-          alert("phong ko ton tai");
-          SetMessagesChat([]);
-          Navigator("/");
-          return;
-        }
-        SetMessagesChat(res.data.getChat);
-        return;
-      }
-    } catch (error) {
-      console.error("Retrying... Error:", error);
-    }
-  };
-
-  const getAllChat = async () => {
-    try {
-      const activeUser = JSON.parse(localStorage.getItem("active"));
-      const id = activeUser.dataLogin.dataUser.id;
-      if (id !== null) {
-        const res = await axiosClient.post("http://localhost:3000/user/chat", {
-          id: id
-        });
-
-        if (res.status === 200 || res.status === 201) {
-          setHistoryChat(res.data.getChat);
-          return;
-        }
-      }
-    } catch (error) {
-      console.error("Retrying... Error:", error);
-    }
-  };
   return (
     <div className="flex-1 h-screen relative shadow-md overflow-y-auto">
       <aside className={`w-full aside ${!isLogin ? "flex" : ""}`}>

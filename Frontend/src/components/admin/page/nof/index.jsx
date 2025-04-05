@@ -14,7 +14,7 @@ const Nof = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
   const { isRole, phongBanID } = useContext(AuthContext);
-  console.log("🚀 ~ Nof ~ isRole:", isRole);
+  // console.log("🚀 ~ Nof ~ isRole:", isRole);
   // Fetch dữ liệu khi component mount
   useEffect(() => {
     const fetchUsers = async () => {
@@ -26,7 +26,7 @@ const Nof = () => {
           res = await axiosClient.post("/user/nofID");
         }
         setUsers(res.data.getChat);
-        console.log("🚀 ~ fetchUsers ~ res.data.getChat:", res.data.getChat);
+        // console.log("🚀 ~ fetchUsers ~ res.data.getChat:", res.data.getChat);
         setFilteredUsers(res.data.getChat);
       } catch (error) {
         console.error("Error fetching users:", error);

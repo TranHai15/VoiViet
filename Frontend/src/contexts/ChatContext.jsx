@@ -23,11 +23,11 @@ export const AppProvider = ({ children }) => {
   const fakeData = async (id) => {
     try {
       const res = await axiosClient.post("/user/notifications", { id: id });
-      const soTb = res.data.Notification.filter((value) => {
+      const soTb = res?.data?.Notification.filter((value) => {
         return value.is_read == 0;
       });
-      setNotification_cont(soTb.length);
-      setNotifications(res.data.Notification);
+      setNotification_cont(soTb?.length);
+      setNotifications(res?.data?.Notification);
     } catch (error) {
       console.log(error);
     }

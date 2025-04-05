@@ -18,6 +18,6 @@ router.post("/login", authController.loginUser);
 router.post("/refresh", authController.requestRefreshToken);
 
 // Định nghĩa route để logout
-router.post("/logout", middlewares.verifyToken, authController.userLogout);
+router.post("/logout", authController.userLogout);
 
 export default router;
