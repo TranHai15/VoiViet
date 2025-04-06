@@ -151,7 +151,7 @@ axiosClient.interceptors.response.use(
     // Kiểm tra nếu lỗi là do token hết hạn (errorCode: TOKEN_EXPIRED)
     try {
       if (
-        error.response.status === 401 &&
+        error.response?.status === 401 &&
         error.response.data?.errorCode === "TOKEN_EXPIRED" &&
         !originalRequest._retry
       ) {

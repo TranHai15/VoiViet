@@ -5,7 +5,7 @@ async function setupSocket(server) {
   // console.log(server);
   io = new Server(server, {
     cors: {
-      origin: process.env.API__FE,
+      origin: `${process.env.API__FE}`,
       methods: ["GET", "POST"]
     }
   });

@@ -317,7 +317,7 @@ class fileModel {
     } else {
       console.log("No .pdf files to process");
     }
-    const res = await fileModel.GetFileANDSenFile();
+    const res = await fileModel.GetFileANDSenFile(statusFile);
     if (res.status == true) {
       console.log("Quá trình xử lý hoàn tất!");
       return { status: true };
@@ -543,7 +543,7 @@ class fileModel {
       const queryStatus = `Select statusFile from files where id = ?`;
       try {
         const [FileStatus] = await user.connection.execute(queryStatus, [id]);
-        statusFile = FileStatus;
+        statusFile = FileStatus[0]?.statusFile;
         const [data] = await user.connection.execute(paramdelete, [id]);
         console.log("File đã được xóa thành công! Cha DB", data);
       } catch (error) {
@@ -635,11 +635,12 @@ class fileModel {
     }
   }
   static async GetFileANDSenFile(FileStatus) {
+    console.log("🚀 ~ fileModel ~ GetFileANDSenFile ~ FileStatus:", FileStatus);
     const user = new fileModel();
     await user.connect();
-    const param = `Select fv.file_path , fv.file_type ,f.statusFile  from file_versions fv join files  f on f.id = fv.file_id   where is_active = 1`;
+    const param = `Select fv.file_path , fv.file_type ,f.statusFile  from file_versions fv join files  f on f.id = fv.file_id   where fv.is_active = 1 AND f.statusFile = ?`;
     try {
-      const [result] = await user.connection.execute(param);
+      const [result] = await user.connection.execute(param, [FileStatus]);
       console.log(
         "🚀 ~ fileModel ~ GetFileANDSenFile ~ gia tri acac file tra ve khi lay ra de guii:",
         result
@@ -651,10 +652,6 @@ class fileModel {
 
       if (result.length >= 1) {
         const idPhongBan = result[0].statusFile;
-        console.log(
-          "🚀 ~ fileModel ~ GetFileANDSenFile ~  id phong ban lay ra dc:",
-          idPhongBan
-        );
         const res = await fileModel.processFiles(result, idPhongBan);
         if (res.status == true) {
           console.log("Quá trình xử lý hoàn tất!");
@@ -664,19 +661,27 @@ class fileModel {
           return { status: false };
         }
       } else {
-        console.log(
-          "🚀 ~ fileModel ~ GetFileANDSenFile ~ statusFile:",
-          FileStatus[0].statusFile
-        );
-        if (FileStatus) {
-          const res = await fileModel.Sendelete(FileStatus[0]?.statusFile);
+        if (FileStatus == 0) {
+          console.log("file bang 0");
+          const res = await fileModel.Sendelete(FileStatus);
           if (res.status == true) {
             return { status: true };
           } else {
             return { status: false };
           }
         } else {
-          return { status: false };
+          if (FileStatus) {
+            console.log("file khong bang 0");
+            const res = await fileModel.Sendelete(FileStatus);
+            console.log("🚀 ~ fileModel ~ GetFileANDSenFile ~ res:", res);
+            if (res.status == true) {
+              return { status: true };
+            } else {
+              return { status: false };
+            }
+          } else {
+            return { status: false };
+          }
         }
       }
     } catch (error) {

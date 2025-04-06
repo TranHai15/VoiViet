@@ -21,7 +21,7 @@ const __dirname = path.dirname(__filename);
 // Middleware hỗ trợ CORS, Cookie, JSON
 app.use(
   cors({
-    origin: process.env.API__FE,
+    origin: "*",
     methods: ["GET", "POST", "PUT", "DELETE"],
     credentials: true
   })
