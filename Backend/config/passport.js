@@ -6,10 +6,10 @@ import axios from "axios";
 
 const checkWithAi = async () => {
   try {
-    // const res = await axios.post(`${process.env.URL__AI}/upload`);
-    const res = await axios.get(
-      "https://c0a5-2405-4802-184a-f4b0-e4ca-f494-9dfc-3c2a.ngrok-free.app/upload"
-    );
+    const res = await axios.get(`${process.env.URL__AI}upload`);
+    // const res = await axios.get(
+    //   "https://c0a5-2405-4802-184a-f4b0-e4ca-f494-9dfc-3c2a.ngrok-free.app/upload"
+    // );
     if (res.status == 200 || res.status == 201) {
       console.log("Ket noi thanh  cong okeokeo eok");
       return true;

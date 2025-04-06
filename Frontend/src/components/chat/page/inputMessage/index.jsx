@@ -173,11 +173,14 @@ export default function InputMessage() {
     const id = dataUser.id;
     for (let attempt = 0; attempt < 3; attempt++) {
       try {
-        const res = await axiosClient.post("http://localhost:3000/user/send", {
-          room: room,
-          message: message,
-          id: id
-        });
+        const res = await axiosClient.post(
+          `${import.meta.env.VITE_API_BACKEND}/user/send`,
+          {
+            room: room,
+            message: message,
+            id: id
+          }
+        );
         if (res.status === 200 || res.status === 201) {
           console.log("Message saved successfully!");
           return;

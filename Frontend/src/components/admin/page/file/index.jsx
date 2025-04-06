@@ -310,7 +310,6 @@ const FileList = () => {
         <LoadingBee />
       ) : (
         <div>
-          <DownloadAllFiles />
           <div className="flex justify-end w-full">
             {isRole !== 1 && (
               <div className="flex flex-col space-y-4 w-full">
@@ -390,6 +389,7 @@ const FileList = () => {
             id="fileInput"
             type="file"
             style={{ display: "none" }}
+            accept=".pdf, .xls, .xlsx"
             onChange={handleFileChangeOne}
           />
           <div className="overflow-x-auto mt-6">

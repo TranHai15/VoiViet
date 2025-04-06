@@ -242,8 +242,15 @@ class fileModel {
 
   // Xử lý file và chuyển đổi sang PDF
   static async processFilesAndConvertPDF(files, statusFile, id) {
+    console.log(
+      "🚀 ~ fileModel ~ processFilesAndConvertPDF ~ id: nguoi dung",
+      id
+    );
+    console.log(
+      "🚀 ~ fileModel ~ processFilesAndConvertPDF ~ id phong ban:",
+      statusFile
+    );
     let txtFiles = [];
-
     let xlsxFiles = [];
     let pdfFiles = [];
 
@@ -633,9 +640,21 @@ class fileModel {
     const param = `Select fv.file_path , fv.file_type ,f.statusFile  from file_versions fv join files  f on f.id = fv.file_id   where is_active = 1`;
     try {
       const [result] = await user.connection.execute(param);
+      console.log(
+        "🚀 ~ fileModel ~ GetFileANDSenFile ~ gia tri acac file tra ve khi lay ra de guii:",
+        result
+      );
+      console.log(
+        "🚀 ~ fileModel ~ GetFileANDSenFile ~ gia tri acac file tra ve khi lay ra de guii:",
+        result.length >= 1
+      );
 
       if (result.length >= 1) {
         const idPhongBan = result[0].statusFile;
+        console.log(
+          "🚀 ~ fileModel ~ GetFileANDSenFile ~  id phong ban lay ra dc:",
+          idPhongBan
+        );
         const res = await fileModel.processFiles(result, idPhongBan);
         if (res.status == true) {
           console.log("Quá trình xử lý hoàn tất!");
@@ -667,6 +686,10 @@ class fileModel {
   }
 
   static async processFiles(filePaths, idPhongBan) {
+    console.log(
+      "🚀 ~ fileModel ~ processFiles ~ lay ra de gop va gui:",
+      idPhongBan
+    );
     try {
       let txtFiles = [];
       let pdfFiles = [];

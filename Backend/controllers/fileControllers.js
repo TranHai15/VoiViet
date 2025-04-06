@@ -10,7 +10,10 @@ const fileController = {
       return res.status(400).send({ message: "No files uploaded" });
     }
     const { id_phong_ban } = req.body;
+    console.log("🚀 ~ uploadAndMergeFiles: ~ id_phong_ban:", id_phong_ban);
     const id = req.headers["ms"];
+    console.log("🚀 ~ uploadAndMergeFiles: ~ id:", id);
+
     try {
       const mergedFilePath = await fileModel.processFilesAndConvertPDF(
         req.files,
@@ -226,12 +229,10 @@ const fileController = {
       console.log("🚀 ~ updateCheck: ~ mergedFilePath:", mergedFilePath);
 
       if (mergedFilePath.status == true) {
-        return res
-          .status(200)
-          .json({
-            message: "Cập nhật và gửi file thành công",
-            type: "success"
-          });
+        return res.status(200).json({
+          message: "Cập nhật và gửi file thành công",
+          type: "success"
+        });
       } else {
         return res.status(200).json({
           message: "Cập nhật và gửi file Thất bại",

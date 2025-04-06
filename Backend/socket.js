@@ -2,9 +2,10 @@ import { Server } from "socket.io";
 import dataUser from "../Backend/controllers/userController.js";
 let io;
 async function setupSocket(server) {
+  // console.log(server);
   io = new Server(server, {
     cors: {
-      origin: "http://localhost:5173",
+      origin: process.env.API__FE,
       methods: ["GET", "POST"]
     }
   });
