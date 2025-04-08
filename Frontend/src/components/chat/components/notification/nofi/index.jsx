@@ -44,7 +44,7 @@ export default function NotificationList() {
         if (deadlineDate < now) {
           deadlineColor = "red"; // Deadline đã qua
         } else if (deadlineDate - now < 24 * 60 * 60 * 1000) {
-          deadlineColor = "yellow"; // Deadline trong vòng 24 giờ
+          deadlineColor = "rgb(255,214,102)"; // Deadline trong vòng 24 giờ
         }
 
         // Định dạng deadline theo local time
@@ -63,6 +63,7 @@ export default function NotificationList() {
             >
               Deadline: {formattedDeadline}
             </div>
+            <p>Người Giao: {item.fullname}</p>
           </li>
         );
       })}

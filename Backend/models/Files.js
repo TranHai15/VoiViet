@@ -443,7 +443,7 @@ class fileModel {
     const query = `SELECT fv.* , f.file_name , u.fullname
                     FROM file_versions fv
                     JOIN files f ON f.id=fv.file_id
-                    JOIN users u ON u.id = fv.uploaded_by
+                    LEFT JOIN users u ON u.id = fv.uploaded_by
                     WHERE file_id = ?;
   `;
     try {

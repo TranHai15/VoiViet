@@ -348,15 +348,17 @@ const dataUser = {
   },
   addNof: async (req, res) => {
     try {
-      const { tasks } = req.body;
+      const { tasks, user_id } = req.body;
+      console.log("🚀 ~ addNof: ~ tasks:", tasks);
+      console.log("🚀 ~ addNof: ~ user_id:", user_id);
 
       // Kiểm tra dữ liệu đầu vào
       if (!tasks) {
         return res.status(400).json({ message: "Dữ liệu là bắt buộc." });
       }
 
-      // Chèn thông báo vào database và nhận mảng username
-      const getChat = await User.insertNof(tasks);
+      // // Chèn thông báo vào database và nhận mảng username
+      const getChat = await User.insertNof(tasks, user_id);
       console.log("🚀 ~ addNof: ~ getChat:", getChat);
 
       // Loại bỏ các giá trị trùng lặp

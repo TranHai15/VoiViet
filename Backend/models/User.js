@@ -380,13 +380,13 @@ WHERE phong_ban_id = ?
       await user.closeConnection(); // Đóng kết nối
     }
   }
-  static async insertNof(tasks) {
+  static async insertNof(tasks, task_by) {
     const user = new User();
     await user.connect();
 
     const insertQuery = `
-    INSERT INTO notifications (user_id, task, deadline, status, is_read, created_at, updated_at)
-    VALUES (?, ?, ?, ?, ?, ?, ?)
+    INSERT INTO notifications (user_id, task, deadline, status, is_read, created_at, updated_at , task_by)
+    VALUES (?, ?, ?, ?, ?, ?, ?,?)
   `;
 
     // Giả sử bảng users có cột 'username' và 'id' là khóa chính
@@ -404,7 +404,8 @@ WHERE phong_ban_id = ?
               "pending",
               0,
               dateTime(),
-              dateTime()
+              dateTime(),
+              task_by
             ];
             // Thực hiện insert thông báo
             await user.connection.execute(insertQuery, values);
@@ -496,7 +497,7 @@ WHERE phong_ban_id = ?
     const user = new User();
     await user.connect();
 
-    const query = `SELECT is_read , status,deadline,task ,id FROM notifications WHERE user_id = ? ORDER BY created_at desc `;
+    const query = `SELECT n.is_read , n.status,n.deadline,n.task ,n.id , u.fullname FROM notifications n left join users u on u.id = n.task_by  WHERE user_id = ? ORDER BY created_at desc `;
 
     try {
       const [rows] = await user.connection.execute(query, [id]);
