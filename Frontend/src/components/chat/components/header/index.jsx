@@ -1,5 +1,5 @@
 import { useState, useContext } from "react";
-import { Link } from "react-router-dom";
+import { Link, Navigate } from "react-router-dom";
 import { ChatContext } from "../../../../contexts/ChatContext";
 import { AuthContext } from "../../../../contexts/AuthContext";
 import "./style.css"; // Link đến file CSS
@@ -10,7 +10,7 @@ import axiosClient from "../../../../api/axiosClient";
 export default function Header() {
   const { setIsSidebar, isSidebar, notification_cont } =
     useContext(ChatContext);
-  const { isLogin, setIsLogin } = useContext(AuthContext);
+  const { isLogin, setIsLogin, isRole } = useContext(AuthContext);
   const [isNotificationsVisible, setIsNotificationsVisible] = useState(false);
   const [isLogoutVisible, setIsLogoutVisible] = useState(false);
   const datass = JSON.parse(localStorage.getItem("active"));
@@ -107,21 +107,28 @@ export default function Header() {
             {/* Pop-up đăng xuất */}
             {isLogoutVisible && (
               <div className="logout-popups absolute right-0 mt-2 bg-white shadow-lg rounded border p-2 z-50">
-                <button
-                  className="logout-button flex items-center gap-2"
-                  onClick={() => {
-                    logout(1);
-                    setIsLogin(false);
-                    setIsLogoutVisible(false);
-                  }}
-                >
-                  <img
-                    src="../../../../src/assets/user/logout.svg"
-                    alt="Logout Icon"
-                    className="logout-icon"
-                  />
-                  Đăng xuất
-                </button>
+                <div className="flex-col">
+                  <button
+                    className="logout-button flex items-center gap-2"
+                    onClick={() => {
+                      logout(1);
+                      setIsLogin(false);
+                      setIsLogoutVisible(false);
+                    }}
+                  >
+                    <img
+                      src="../../../../src/assets/user/logout.svg"
+                      alt="Logout Icon"
+                      className="logout-icon"
+                    />
+                    Đăng xuất
+                  </button>
+                  {isRole !== 2 && (
+                    <button className="logout-button flex items-center gap-2">
+                      <Link to={"/admin"}> Quản trị</Link>{" "}
+                    </button>
+                  )}
+                </div>
               </div>
             )}
           </div>

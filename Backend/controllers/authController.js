@@ -121,16 +121,6 @@ const authController = {
           password: "Mật khẩu sai"
         });
       }
-
-      // const isLogin = await User.getSessionByUserId(user.id, false);
-      // console.log("🚀 ~ loginUser: ~ isLogin:", isLogin);
-      // console.log(isLogin[0].session_count > 0);
-      // if (isLogin[0].session_count > 0) {
-      //   return res.status(409).json({
-      //     All: "Tài Khoản này đang được đăng nhập trên thiết bị khác"
-      //   });
-      // }
-      //  xóa hết phiên đăng nhập của tài khoản theo id
       await User.getSessionByUserId(user.id, true);
 
       let accessToken, refreshToken;
